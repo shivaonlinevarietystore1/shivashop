@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shopping Cart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+  <!-- Header -->
+  <header class="bg-white shadow p-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold">My Shop</h1>
+    <div>
+      Cart Items: <span id="cart-count">0</span>
+    </div>
+  </header>
+
+  <!-- Products -->
+  <section class="container mx-auto py-12">
+    <h2 class="text-2xl font-bold mb-6 text-center">Products</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+      <div class="bg-white p-4 shadow rounded text-center">
+        <h3 class="font-semibold text-lg">Product A</h3>
+        <p class="mb-2">$10.00</p>
+        <button onclick="addToCart('Product A', 10.00)" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Add to Cart</button>
+      </div>
+      <div class="bg-white p-4 shadow rounded text-center">
+        <h3 class="font-semibold text-lg">Product B</h3>
+        <p class="mb-2">$15.00</p>
+        <button onclick="addToCart('Product B', 15.00)" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Add to Cart</button>
+      </div>
+      <div class="bg-white p-4 shadow rounded text-center">
+        <h3 class="font-semibold text-lg">Product C</h3>
+        <p class="mb-2">$20.00</p>
+        <button onclick="addToCart('Product C', 20.00)" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Add to Cart</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cart Section -->
+  <section id="cart" class="container mx-auto py-12">
+    <h3 class="text-2xl font-bold mb-6 text-center">Your Cart</h3>
+    <ul id="cart-items" class="max-w-lg mx-auto space-y-2 text-center"></ul>
+    <p id="cart-total" class="font-bold text-lg mt-4 text-center">Total: $0.00</p>
+    <div class="text-center mt-4">
+      <button onclick="clearCart()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Clear Cart</button>
+    </div>
+  </section>
+
+  <script>
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    function addToCart(productName, price) {
+      const item = cart.find(i => i.name === productName);
+      if (item) {
+        item.quantity++;
+      } else {
+        cart.push({ name: productName, price, quantity: 1 });
+      }
+      saveCart();
+      updateCartDisplay();
+    }
+
+    function removeItem(index) {
+      cart.splice(index, 1);
+      saveCart();
+      updateCartDisplay();
+    }
+
+    function clearCart() {
+      cart = [];
+      saveCart();
+      updateCartDisplay();
+    }
+
+    function saveCart() {
+      localStorage.setItem('cart', JSON.stringify(cart));
+    }
+
+    function updateCartDisplay() {
+      const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
+      document.getElementById('cart-count').textContent = cartCount;
+
+      const cartList = document.getElementById('cart-items');
+      cartList.innerHTML = '';
+      cart.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <div class="flex justify-between items-center bg-white p-2 rounded shadow">
+            <span>${item.name} x ${item.quantity} - $${(item.price * item.quantity).toFixed(2)}</span>
+            <button onclick="removeItem(${index})" class="text-red-600 hover:text-red-800 font-bold">&times;</button>
+          </div>
+        `;
+        cartList.appendChild(li);
+      });
+
+      const totalPrice = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+      document.getElementById('cart-total').textContent = `Total: $${totalPrice.toFixed(2)}`;
+    }
+
+    updateCartDisplay();
+  </script>
+
+</body>
+</html>
